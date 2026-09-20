@@ -85,6 +85,7 @@ card falls back to a placeholder glyph.
 render_prospect_cards.R              # CSV -> populated HTML cards
 loadPackages.R                       # package bootstrap (pacman + tidyverse, jsonlite, ...)
 combine_dummy_data.csv               # sample input
+headshots/                           # player headshots referenced by the CSV
 prospect_card_template_white.html    # card template (light theme)
 examples/                            # rendered sample cards (HTML / PDF / PNG)
 ```
