@@ -1,0 +1,11 @@
+# Rendered output from render_prospect_cards.R
+cards_out/
+
+# R
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj
+
+# macOS
+.DS_Store
