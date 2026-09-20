@@ -33,7 +33,8 @@ META_COLS <- c(
   position = "position",
   team     = "team",
   height   = "height",
-  weight   = "weight"
+  weight   = "weight",
+  headshot = "headshot"
 )
 
 RAW_STAT_COLS <- c(
@@ -137,6 +138,42 @@ letter_to_pct <- function(letters_vec) {
 blank_to_na <- function(x) ifelse(is.na(x) | trimws(x) == "", NA, x)
 
 # ---------------------------------------------------------------------------
+# embed_headshot(): local image path -> base64 data URI, so each card stays a
+# single self-contained file. data: URIs and http(s) URLs pass through
+# untouched; a missing file warns and falls back to the placeholder glyph.
+# Relative paths resolve against the CSV's own directory.
+# ---------------------------------------------------------------------------
+embed_headshot <- function(path) {
+  if (is.na(path) || trimws(path) == "") return(NA_character_)
+  path <- trimws(path)
+  if (grepl("^(data:|https?://)", path)) return(path)
+
+  resolved <- if (file.exists(path)) path else file.path(dirname(csv_path), path)
+  if (!file.exists(resolved)) {
+    warning("Headshot not found, using placeholder: ", path, call. = FALSE)
+    return(NA_character_)
+  }
+
+  mime <- switch(
+    tolower(tools::file_ext(resolved)),
+    png  = "image/png",
+    jpg  = "image/jpeg",
+    jpeg = "image/jpeg",
+    webp = "image/webp",
+    gif  = "image/gif",
+    NA_character_
+  )
+  if (is.na(mime)) {
+    warning("Unsupported headshot type, using placeholder: ", path, call. = FALSE)
+    return(NA_character_)
+  }
+
+  raw_img <- readBin(resolved, "raw", file.info(resolved)$size)
+  b64     <- gsub("[\r\n]", "", base64_enc(raw_img))
+  paste0("data:", mime, ";base64,", b64)
+}
+
+# ---------------------------------------------------------------------------
 # build_player(): turns one CSV row into the same nested structure the
 # JS buildPlayerFromRow() produces -- name/age/.../rawStats/categories.
 # ---------------------------------------------------------------------------
@@ -149,6 +186,8 @@ build_player <- function(row) {
     }),
     names(META_COLS)
   )
+
+  meta$headshot <- embed_headshot(meta$headshot)
   
   raw_stats <- setNames(
     lapply(RAW_STAT_COLS, function(col) {

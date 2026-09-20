@@ -94,6 +94,13 @@
     display:flex;align-items:center;justify-content:center;
     color:var(--sub);
     font-size:22px;
+    overflow:hidden;
+  }
+  .headshot img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
   }
   .name-block{flex:1;min-width:0;}
   .name-block h1{
@@ -405,6 +412,17 @@ function overallScore(){
 
 /* ---------------- header ---------------- */
 document.getElementById('player-name').textContent = playerData.name || "Player Name";
+
+/* headshot: a data: URI (inlined by render_prospect_cards.R) or any image URL.
+   Left blank, the placeholder glyph stays. */
+if (playerData.headshot) {
+  const headshotEl = document.getElementById('headshot');
+  const img = document.createElement('img');
+  img.src = playerData.headshot;
+  img.alt = playerData.name || 'Player headshot';
+  headshotEl.textContent = '';
+  headshotEl.appendChild(img);
+}
 document.getElementById('player-meta').textContent =
   `Age ${fmt(playerData.age)} · ${playerData.position||'--'} · ${playerData.team||'Canada Basketball'}` +
   (playerData.height ? ` · ${playerData.height}` : '') +

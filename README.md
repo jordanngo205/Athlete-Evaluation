@@ -5,7 +5,7 @@ player. Evaluators enter letter grades (A–J) per drill; the pipeline converts 
 percentiles, rolls them up into weighted category scores and an overall rating, and
 injects the result into an HTML card template.
 
-![Sample prospect card](examples/ben_affleck_card.png)
+![Sample prospect card](examples/delaney_gibb_card.png)
 
 ## How the scoring works
 
@@ -50,12 +50,12 @@ CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
 # PDF — single page, no scaling
 "$CHROME" --headless --no-pdf-header-footer --virtual-time-budget=10000 \
-  --print-to-pdf=card.pdf "file://$PWD/cards_out/ben_affleck_card.html"
+  --print-to-pdf=card.pdf "file://$PWD/cards_out/delaney_gibb_card.html"
 
 # PNG — 2x for retina / slide decks
 "$CHROME" --headless --hide-scrollbars --force-device-scale-factor=2 \
   --window-size=932,1633 --virtual-time-budget=10000 \
-  --screenshot=card.png "file://$PWD/cards_out/ben_affleck_card.html"
+  --screenshot=card.png "file://$PWD/cards_out/delaney_gibb_card.html"
 ```
 
 Add `@page { size: 932px 1633px; margin: 0 }` and `print-color-adjust: exact` to the
@@ -65,13 +65,19 @@ template's print styles to keep the backdrop and tile colors in the PDF.
 
 `combine_dummy_data.csv` is a 3-player dummy set showing the expected layout.
 
-- **Meta:** `player_id, name, age, position, team, height, weight`
+- **Meta:** `player_id, name, age, position, team, height, weight, headshot`
 - **Raw stats** (printed verbatim on the card): `ppg, apg, rpg, spg, bpg, fg_pct, three_pct, ft_pct`
 - **Graded KPIs** (A–J): `scoring_*`, `handle_*`, `defense_*`, `passing_*`, `physical_*`, `anthro_*`
 
 Every column is read as character so letter grades and formatted values (`6' 4"`,
-`190 lbs`) survive untouched. The column list in `render_prospect_cards.R` mirrors the
-`CSV_SCHEMA` object inside the HTML template — keep the two in sync if the layout changes.
+`190 lbs`) survive untouched. The column list lives in `render_prospect_cards.R`
+(`META_COLS`, `RAW_STAT_COLS`, `CATEGORIES`) — that is the single source of truth for
+the schema.
+
+**Headshots.** The optional `headshot` column takes a local image path (resolved
+relative to the CSV), a `data:` URI, or an http(s) URL. Local files are base64-inlined
+into the card so it stays a single self-contained file; leave the cell blank and the
+card falls back to a placeholder glyph.
 
 ## Repo layout
 
